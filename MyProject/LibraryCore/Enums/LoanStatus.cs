@@ -1,4 +1,4 @@
-namespace LibaryCore.Enums;
+namespace LibraryCore.Enums;
 
 /// <summary>Lifecycle of a <see cref="Entities.Loan"/>.</summary>
 public enum LoanStatus

@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="LibaryCore/LibaryCore.csproj" Id="84432ca1-0d42-4682-8e3b-bdefb6f8a87e" />
-  <Project Path="LibaryData/LibaryData.csproj" Id="4b0df65a-bc15-478e-9b6b-a171d77aa93c" />
-  <Project Path="LibaryService/LibaryService.csproj" Id="41b46e55-671e-4528-bb42-69fd1eb10146" />
-  <Project Path="MyProject/Libary.csproj" />
-</Solution>

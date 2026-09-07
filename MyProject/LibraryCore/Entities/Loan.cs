@@ -1,6 +1,6 @@
-using LibaryCore.Enums;
+using LibraryCore.Enums;
 
-namespace LibaryCore.Entities;
+namespace LibraryCore.Entities;
 
 /// <summary>
 /// One borrow event: member X took book Y on a date, due on a date, maybe returned.

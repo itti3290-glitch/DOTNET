@@ -1,6 +1,6 @@
-using LibaryCore.Enums;
+using LibraryCore.Enums;
 
-namespace LibaryCore.Entities;
+namespace LibraryCore.Entities;
 
 /// <summary>
 /// A registered account. One table holds both kinds of user - the <see cref="Role"/> field

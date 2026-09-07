@@ -1,4 +1,4 @@
-namespace LibaryCore.Enums;
+namespace LibraryCore.Enums;
 
 /// <summary>
 /// State of a <see cref="Entities.Book"/> - the limited resource of this system.

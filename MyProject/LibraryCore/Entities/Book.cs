@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using LibaryCore.Enums;
+using LibraryCore.Enums;
 
-namespace LibaryCore.Entities;
+namespace LibraryCore.Entities;
 
 /// <summary>
 /// A book in the library - and the limited resource itself. There is exactly one row per

@@ -1,4 +1,4 @@
-namespace LibaryCore.Enums;
+namespace LibraryCore.Enums;
 
 /// <summary>
 /// Application roles. Two roles with different real permissions:

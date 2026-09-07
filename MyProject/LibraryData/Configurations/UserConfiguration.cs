@@ -1,8 +1,8 @@
-using LibaryCore.Entities;
+using LibraryCore.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace LibaryData.Configurations;
+namespace LibraryData.Configurations;
 
 /// <summary>Fluent API rules for <see cref="User"/> (borrower or manager).</summary>
 public class UserConfiguration : IEntityTypeConfiguration<User>

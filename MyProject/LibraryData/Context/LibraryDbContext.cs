@@ -1,18 +1,18 @@
-using LibaryCore.Entities;
+using LibraryCore.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace LibaryData.Context;
+namespace LibraryData.Context;
 
 /// <summary>
 /// EF Core context for the library. Code-First: every <see cref="DbSet{TEntity}"/> becomes a
-/// table, and the per-entity Fluent API rules live in <c>LibaryData/Configurations</c> and are
+/// table, and the per-entity Fluent API rules live in <c>LibraryData/Configurations</c> and are
 /// picked up by <see cref="ModelBuilder.ApplyConfigurationsFromAssembly"/>.
 /// The provider and connection string are supplied from the API layer via
 /// <c>AddDbContext</c> - this class knows nothing about where the database is.
 /// </summary>
-public class LibaryDbContext : DbContext
+public class LibraryDbContext : DbContext
 {
-    public LibaryDbContext(DbContextOptions<LibaryDbContext> options) : base(options)
+    public LibraryDbContext(DbContextOptions<LibraryDbContext> options) : base(options)
     {
     }
 
@@ -25,6 +25,6 @@ public class LibaryDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(LibaryDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(LibraryDbContext).Assembly);
     }
 }
