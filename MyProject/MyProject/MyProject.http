@@ -1,6 +1,68 @@
-@MyProject_HostAddress = http://localhost:5152
+@host = http://localhost:5152
 
-GET {{MyProject_HostAddress}}/weatherforecast/
-Accept: application/json
+### Register a new borrower
+# @name register
+POST {{host}}/api/auth/register
+Content-Type: application/json
 
-###
+{
+  "userName": "alice",
+  "email": "alice@example.com",
+  "fullName": "Alice Reader",
+  "password": "Password123!"
+}
+
+### Log in as the seeded manager
+# @name login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "userNameOrEmail": "manager",
+  "password": "Manager123!"
+}
+
+@token = {{login.response.body.accessToken}}
+
+### Who am I
+GET {{host}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### Browse the catalog
+GET {{host}}/api/books?search=code&page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+### Add a book (manager only)
+# @name newBook
+POST {{host}}/api/books
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "The Mythical Man-Month",
+  "author": "Fred Brooks",
+  "isbn": "9780201835953",
+  "publicationYear": 1975,
+  "description": "Essays on software engineering."
+}
+
+### Borrow a book
+POST {{host}}/api/loans
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "bookId": 1
+}
+
+### My loans
+GET {{host}}/api/loans/mine
+Authorization: Bearer {{token}}
+
+### Return a loan
+POST {{host}}/api/loans/1/return
+Authorization: Bearer {{token}}
+
+### All loans (manager only)
+GET {{host}}/api/loans?overdueOnly=false&page=1&pageSize=20
+Authorization: Bearer {{token}}
