@@ -228,7 +228,7 @@ namespace Library.Data.Migrations
                             Id = 1,
                             Email = "admin@library.local",
                             FullName = "Library Admin",
-                            PasswordHash = "!SEED-PLACEHOLDER!",
+                            PasswordHash = "v1.210000.IRzm9BJmjQ3lBW+ICEoajQ==.a5+PbzmF1az6vrnPDwyIjjW93HlY+881dxC+xz7oQaQ=",
                             Role = "Admin"
                         },
                         new

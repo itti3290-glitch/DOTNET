@@ -63,9 +63,9 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
         b.Property(x => x.PasswordHash).IsRequired().HasMaxLength(500);
         b.Property(x => x.Role).HasConversion<string>().HasMaxLength(20);
 
-        // PasswordHash is a placeholder that no password verifies against; real credentials are set via the service layer.
+        // DEV ONLY: admin password is "Admin123!" (PBKDF2 hash, same format as PasswordHasher). Change it outside development. Dana keeps an unusable placeholder hash.
         b.HasData(
-            new Member { Id = 1, FullName = "Library Admin", Email = "admin@library.local", PasswordHash = "!SEED-PLACEHOLDER!", Role = UserRole.Admin },
+            new Member { Id = 1, FullName = "Library Admin", Email = "admin@library.local", PasswordHash = "v1.210000.IRzm9BJmjQ3lBW+ICEoajQ==.a5+PbzmF1az6vrnPDwyIjjW93HlY+881dxC+xz7oQaQ=", Role = UserRole.Admin },
             new Member { Id = 2, FullName = "Dana Levi", Email = "dana@library.local", PasswordHash = "!SEED-PLACEHOLDER!", Role = UserRole.Member });
     }
 }

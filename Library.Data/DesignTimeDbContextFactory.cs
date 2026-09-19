@@ -12,7 +12,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<LibraryDbC
     public LibraryDbContext CreateDbContext(string[] args)
     {
         var connection = Environment.GetEnvironmentVariable("LIBRARY_CONNECTION")
-            ?? "Server=(localdb)\\MSSQLLocalDB;Database=LibraryDb;Trusted_Connection=True;TrustServerCertificate=True";
+            ?? "Server=(localdb)\\MSSQLLocalDB;Database=LibraryApiDb;Trusted_Connection=True;TrustServerCertificate=True";
 
         var options = new DbContextOptionsBuilder<LibraryDbContext>().UseSqlServer(connection).Options;
         return new LibraryDbContext(options);
