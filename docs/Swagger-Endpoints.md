@@ -40,6 +40,22 @@
 ```
 ה-`correlationId` זהה לכותרת `X-Correlation-Id` בתשובה ולמזהה בכל שורת לוג של אותה בקשה, כך שאפשר לשחזר בקשה שלמה מתוך קובץ הלוג.
 
+### שגיאות ולידציה (400 עם פירוט שדות)
+כשהקלט לא עומד בכללי ה-Data Annotations שעל ה-DTOs (שדה חובה, אורך, טווח, פורמט מייל), התשובה היא אותו מבנה אחיד עם רשימת השדות הפגומים:
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "One or more fields are invalid.",
+  "errors": {
+    "email": ["The Email field is not a valid e-mail address."],
+    "password": ["The field Password must be a string with a minimum length of 8 and a maximum length of 100."]
+  },
+  "correlationId": "3f9c1e5a7b2d4c68a1d0e94b5f6a7c82"
+}
+```
+גוף בקשה חסר, JSON שבור או ערך מסוג לא נכון מחזירים `errors.body` עם הודעה אחת ברורה. כללי ה-DTOs: כותרת עד 300 תווים, מחבר עד 200, ISBN בין 10 ל-20 תווים, מספר עותקים בין 0 ל-1000, סיסמה בין 8 ל-100 תווים, ומזהים חייבים להיות 1 ומעלה. כללים שתלויים במצב הנתונים (ISBN כפול, מלאי, בעלות) נבדקים בשכבת ה-Service ומחזירים 400/409 כמפורט בכל נקודת קצה.
+
 ### עימוד (Paging)
 נקודות קצה שמחזירות רשימה מקבלות פרמטרים ב-Query:
 - `page`: מספר העמוד, ברירת מחדל 1.
