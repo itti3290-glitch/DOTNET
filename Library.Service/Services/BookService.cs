@@ -13,9 +13,9 @@ public class BookService(
     IUnitOfWork uow,
     IMapper mapper) : IBookService
 {
-    public async Task<PagedResult<BookResponse>> GetAllAsync(PageQuery query, CancellationToken ct)
+    public async Task<PagedResult<BookResponse>> GetAllAsync(BookQuery query, CancellationToken ct)
     {
-        var (items, total) = await books.GetPagedAsync(query.SafePage, query.SafePageSize, ct);
+        var (items, total) = await books.GetPagedAsync(query, ct);
         return new PagedResult<BookResponse>(mapper.Map<List<BookResponse>>(items), query.SafePage, query.SafePageSize, total);
     }
 

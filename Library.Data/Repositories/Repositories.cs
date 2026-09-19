@@ -1,3 +1,5 @@
+using Library.Core.Dtos;
+using Library.Core.Enums;
 using Library.Core.Entities;
 using Library.Core.Exceptions;
 using Library.Core.Interfaces;
@@ -8,14 +10,40 @@ namespace Library.Data.Repositories;
 
 public class BookRepository(LibraryDbContext db) : IBookRepository
 {
-    public async Task<(IReadOnlyList<Book> Items, int Total)> GetPagedAsync(int page, int pageSize, CancellationToken ct)
+    public async Task<(IReadOnlyList<Book> Items, int Total)> GetPagedAsync(BookQuery q, CancellationToken ct)
     {
         var query = db.Books.AsNoTracking();
+
+        // Filters: all translate to SQL WHERE clauses (Contains -> LIKE, wildcards are escaped by EF).
+        if (!string.IsNullOrWhiteSpace(q.Search))
+        {
+            var s = q.Search.Trim();
+            query = query.Where(b => b.Title.Contains(s) || b.Author.Contains(s) || b.Isbn.Contains(s));
+        }
+        if (!string.IsNullOrWhiteSpace(q.Author))
+        {
+            var a = q.Author.Trim();
+            query = query.Where(b => b.Author.Contains(a));
+        }
+        if (q.CategoryId is not null)
+            query = query.Where(b => b.Categories.Any(c => c.Id == q.CategoryId));
+        if (q.AvailableOnly)
+            query = query.Where(b => b.AvailableCopies > 0);
+
         var total = await query.CountAsync(ct);
-        var items = await query
+
+        // Sorting: whitelisted by enum; Id as a tie-breaker keeps paging stable.
+        var ordered = q.SortBy switch
+        {
+            BookSortBy.Author => q.Desc ? query.OrderByDescending(b => b.Author) : query.OrderBy(b => b.Author),
+            BookSortBy.Availability => q.Desc ? query.OrderByDescending(b => b.AvailableCopies) : query.OrderBy(b => b.AvailableCopies),
+            _ => q.Desc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title)
+        };
+
+        var items = await ordered
+            .ThenBy(b => b.Id)
             .Include(b => b.Categories)
-            .OrderBy(b => b.Title).ThenBy(b => b.Id)
-            .Skip((page - 1) * pageSize).Take(pageSize)
+            .Skip((q.SafePage - 1) * q.SafePageSize).Take(q.SafePageSize)
             .ToListAsync(ct);
         return (items, total);
     }

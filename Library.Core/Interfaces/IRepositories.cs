@@ -1,3 +1,4 @@
+using Library.Core.Dtos;
 using Library.Core.Entities;
 
 namespace Library.Core.Interfaces;
@@ -8,7 +9,7 @@ namespace Library.Core.Interfaces;
 /// </summary>
 public interface IBookRepository
 {
-    Task<(IReadOnlyList<Book> Items, int Total)> GetPagedAsync(int page, int pageSize, CancellationToken ct);
+    Task<(IReadOnlyList<Book> Items, int Total)> GetPagedAsync(BookQuery query, CancellationToken ct);
     Task<Book?> GetByIdAsync(int id, CancellationToken ct);
     /// <summary>Tracked, for modification.</summary>
     Task<Book?> GetForUpdateAsync(int id, CancellationToken ct);

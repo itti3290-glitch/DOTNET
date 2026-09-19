@@ -11,7 +11,7 @@ namespace Library.API.Controllers;
 public class BooksController(IBookService books) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<PagedResult<BookResponse>>> GetAll([FromQuery] PageQuery query, CancellationToken ct) =>
+    public async Task<ActionResult<PagedResult<BookResponse>>> GetAll([FromQuery] BookQuery query, CancellationToken ct) =>
         Ok(await books.GetAllAsync(query, ct));
 
     [HttpGet("{id:int}")]

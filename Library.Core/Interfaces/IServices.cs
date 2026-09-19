@@ -4,7 +4,7 @@ namespace Library.Core.Interfaces;
 
 public interface IBookService
 {
-    Task<PagedResult<BookResponse>> GetAllAsync(PageQuery query, CancellationToken ct);
+    Task<PagedResult<BookResponse>> GetAllAsync(BookQuery query, CancellationToken ct);
     Task<BookResponse> GetByIdAsync(int id, CancellationToken ct);
     Task<BookResponse> CreateAsync(CreateBookRequest request, CancellationToken ct);
     Task UpdateAsync(int id, UpdateBookRequest request, CancellationToken ct);

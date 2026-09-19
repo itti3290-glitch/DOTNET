@@ -45,3 +45,14 @@ public record LoginRequest(string Email, string Password);
 public record AuthResponse(string Token, DateTime ExpiresAtUtc, MemberResponse Member);
 
 public record ReturnLoanRequest(int LoanId);
+
+/// <summary>Book list filters and sorting. Every filter is optional; all run inside the SQL query.</summary>
+public record BookQuery(
+    string? Search = null,
+    string? Author = null,
+    int? CategoryId = null,
+    bool AvailableOnly = false,
+    BookSortBy SortBy = BookSortBy.Title,
+    bool Desc = false,
+    int Page = 1,
+    int PageSize = 20) : PageQuery(Page, PageSize);

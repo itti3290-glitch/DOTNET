@@ -99,9 +99,23 @@
 כל הבקר דורש התחברות. פעולות כתיבה דורשות `Admin`.
 
 ### 2.1 `GET /api/books`
-**מטרה:** רשימת ספרים עם עימוד.
+**מטרה:** רשימת ספרים עם חיפוש, סינון, מיון ועימוד.
 **גישה:** כל משתמש מחובר.
-**מה קורה:** `BookRepository.GetPagedAsync` קורא בלי מעקב (`AsNoTracking`), סופר את כל הספרים, ממיין לפי כותרת ומחזיר רק את העמוד המבוקש, כולל שמות הקטגוריות.
+
+**פרמטרים ב-Query (כולם אופציונליים):**
+| פרמטר | משמעות | דוגמה |
+|---|---|---|
+| `search` | חיפוש חלקי בכותרת, במחבר או ב-ISBN | `search=clean` |
+| `author` | סינון לפי מחבר (התאמה חלקית) | `author=herbert` |
+| `categoryId` | רק ספרים בקטגוריה מסוימת | `categoryId=1` |
+| `availableOnly` | `true` מציג רק ספרים עם עותק פנוי | `availableOnly=true` |
+| `sortBy` | `Title` (ברירת מחדל), `Author` או `Availability` | `sortBy=Author` |
+| `desc` | `true` למיון יורד | `desc=true` |
+| `page`, `pageSize` | עימוד | `page=2&pageSize=10` |
+
+ערך לא חוקי ב-`sortBy` מחזיר 400. אפשר לשלב כמה פרמטרים יחד.
+
+**מה קורה:** `BookRepository.GetPagedAsync` בונה שאילתה אחת ב-SQL. הסינון (`WHERE`), הספירה, המיון והעימוד (`Skip`/`Take`) כולם מתבצעים במסד הנתונים ולא בזיכרון, בלי מעקב (`AsNoTracking`). המיון מוגבל לרשימה קבועה של עמודות, ותמיד יש מיון משני לפי `Id` כדי שהעימוד יהיה יציב. תווים כמו `%` בחיפוש מטופלים כטקסט רגיל.
 **תשובות:** 200 עם `PagedResult<BookResponse>`. כל ספר מכיל `id`, `title`, `author`, `isbn`, `totalCopies`, `availableCopies` ו-`categories`.
 
 ### 2.2 `GET /api/books/{id}`
