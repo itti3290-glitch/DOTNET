@@ -17,3 +17,9 @@ public class NoCopiesAvailableException(int bookId)
 /// </summary>
 public class ConcurrencyConflictException(string message, Exception? inner = null)
     : Exception(message, inner);
+
+/// <summary>Invalid input. Maps to HTTP 400.</summary>
+public class ValidationException(string message) : Exception(message);
+
+/// <summary>Bad credentials. Maps to HTTP 401.</summary>
+public class AuthenticationFailedException() : Exception("Invalid email or password.");

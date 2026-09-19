@@ -34,3 +34,9 @@ public interface IPasswordHasher
     string Hash(string password);
     bool Verify(string password, string hash);
 }
+
+public interface IAuthService
+{
+    /// <summary>Returns the member for valid credentials; throws AuthenticationFailedException otherwise.</summary>
+    Task<MemberResponse> ValidateCredentialsAsync(LoginRequest request, CancellationToken ct);
+}

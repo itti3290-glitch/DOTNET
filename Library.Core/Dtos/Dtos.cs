@@ -38,3 +38,10 @@ public record PageQuery(int Page = 1, int PageSize = 20)
     public int SafePage => Page < 1 ? 1 : Page;
     public int SafePageSize => PageSize < 1 ? 20 : Math.Min(PageSize, MaxPageSize);
 }
+
+// ---- Auth ----
+public record LoginRequest(string Email, string Password);
+
+public record AuthResponse(string Token, DateTime ExpiresAtUtc, MemberResponse Member);
+
+public record ReturnLoanRequest(int LoanId);
