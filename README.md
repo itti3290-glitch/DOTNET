@@ -5,7 +5,7 @@ and return copies, and admins manage the catalogue and the members. Authenticati
 (`Admin`, `Member`), data lives in SQL Server through EF Core (code-first), and the whole request pipeline is
 asynchronous with `CancellationToken` passed from the controller down to EF Core.
 
-> Server only. The React client is a separate repository.
+> Server only. The React + TypeScript client lives in its own repository/folder (`library-client`, next to this one) and talks to this API over HTTP; see its README. The API allows the client's origin through CORS (`Cors:AllowedOrigins`).
 
 ---
 
@@ -61,7 +61,7 @@ Library.Tests     xUnit + Moq tests                                 -> Service, 
 Request flow: `Controller -> Service -> Repository -> DbContext`. Controllers never touch the `DbContext`.
 Entities never leave the API: requests and responses are separate DTOs mapped with AutoMapper.
 
-Middleware order: `CorrelationId -> RequestLogging -> ExceptionHandling -> Swagger -> HTTPS -> Authentication
+Middleware order: `CorrelationId -> RequestLogging -> ExceptionHandling -> Swagger -> HTTPS -> CORS -> Authentication
 -> Authorization -> Controllers`.
 
 ---
@@ -133,9 +133,9 @@ Seed data also contains 3 books (*Clean Code* x3 copies, *The Pragmatic Programm
 
 ### Suggested demo of the concurrency behaviour
 
-1. Log in as Dana, and `POST /api/loans/borrow` with `{ "bookId": 3, "memberId": 2 }`. She gets the only copy of *Dune* (201).
+1. Log in as Dana, and `POST /api/loans` with `{ "bookId": 3, "memberId": 2 }`. She gets the only copy of *Dune* (201).
 2. Log in as the admin and borrow the same book for member 1: **409**, "No copies ... available".
-3. `POST /api/loans/return` with Dana's loan id: the copy is back, and the admin can borrow it now.
+3. `POST /api/loans/{id}/return` with Dana's loan id (no body): the copy is back, and the admin can borrow it now.
 
 A true simultaneous race needs two requests at the same instant; that is what the automated test does.
 
@@ -152,8 +152,8 @@ A true simultaneous race needs two requests at the same instant; that is what th
 | `GET /api/members` | Admin | Paged |
 | `GET /api/members/{id}` | Admin or that member | |
 | `PUT`, `DELETE /api/members/{id}` | Admin | 204 |
-| `POST /api/loans/borrow` | Logged in (members only for themselves) | 201 + `Location`, 409 if no copy or a conflict |
-| `POST /api/loans/return` | Logged in (members only their own loans) | 200 |
+| `POST /api/loans` | Logged in (members only for themselves) | Creates a loan (borrow): 201 + `Location`, 409 if no copy or a conflict |
+| `POST /api/loans/{id}/return` | Logged in (members only their own loans) | Returns the copy, no body: 200 |
 | `GET /api/loans/active`, `GET /api/loans/{id}` | Logged in (members see only their own) | Paged |
 
 `GET /api/books` query parameters (all optional): `search` (title, author or ISBN), `author`, `categoryId`,
@@ -213,6 +213,7 @@ The concurrency tests create and drop a temporary LocalDB database. To use anoth
 |---|---|---|
 | `Jwt:SecretKey` | User Secrets | **No** |
 | `Jwt:Issuer`, `Jwt:Audience`, `Jwt:ExpiryMinutes` | `appsettings.json` | Yes (not secret) |
+| `Cors:AllowedOrigins` | `appsettings.Development.json` (`http://localhost:5173`, the client dev server) | Yes (not secret) |
 | `ConnectionStrings:DefaultConnection` | `appsettings.Development.json` (LocalDB, integrated security, no password) | Yes; override in User Secrets for a real server |
 
 ## Notes

@@ -30,12 +30,12 @@ public class LoansController(ILoanService loans) : ControllerBase
         return Ok(await loans.GetAllAsync(memberId, activeOnly: true, query, ct));
     }
 
-    /// <summary>Borrows one copy. Members can borrow only for themselves.</summary>
-    [HttpPost("borrow")]
+    /// <summary>Creates a loan (borrows one copy). Members can borrow only for themselves.</summary>
+    [HttpPost]
     [ProducesResponseType<LoanResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<LoanResponse>> Borrow(CreateLoanRequest request, CancellationToken ct)
+    public async Task<ActionResult<LoanResponse>> Create(CreateLoanRequest request, CancellationToken ct)
     {
         if (!User.IsAdmin() && request.MemberId != User.GetUserId()) return Forbid();
 
@@ -43,19 +43,19 @@ public class LoansController(ILoanService loans) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = loan.Id }, loan);
     }
 
-    /// <summary>Returns a loaned copy. Members can return only their own loans.</summary>
-    [HttpPost("return")]
+    /// <summary>Returns the loan's copy to the library. Members can return only their own loans.</summary>
+    [HttpPost("{id:int}/return")]
     [ProducesResponseType<LoanResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<LoanResponse>> Return(ReturnLoanRequest request, CancellationToken ct)
+    public async Task<ActionResult<LoanResponse>> Return(int id, CancellationToken ct)
     {
         if (!User.IsAdmin())
         {
-            var existing = await loans.GetByIdAsync(request.LoanId, ct);
+            var existing = await loans.GetByIdAsync(id, ct);
             if (existing.MemberId != User.GetUserId()) return Forbid();
         }
 
-        return Ok(await loans.ReturnBookAsync(request.LoanId, ct));
+        return Ok(await loans.ReturnBookAsync(id, ct));
     }
 }

@@ -17,6 +17,15 @@ builder.Services.AddControllers()
 
 builder.Services.AddUniformValidationResponse();
 
+// CORS: only the origins listed in configuration (Cors:AllowedOrigins), e.g. the React dev server.
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
+    .WithOrigins(allowedOrigins)
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    // Lets browser code read these response headers.
+    .WithExposedHeaders("X-Correlation-Id", "Location")));
+
 builder.Services.AddDataLayer(
     builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Missing ConnectionStrings:DefaultConnection."));
@@ -56,6 +65,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors(); // Before authentication so preflight requests and 401/403 responses carry CORS headers.
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

@@ -48,7 +48,6 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
 
         if (context.Response.HasStarted) return; // Too late to change the response.
 
-        context.Response.Clear();
         context.Response.StatusCode = status;
         context.Response.ContentType = "application/json";
 

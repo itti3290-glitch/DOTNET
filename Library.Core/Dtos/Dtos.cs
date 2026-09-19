@@ -64,7 +64,6 @@ public record LoginRequest(
 
 public record AuthResponse(string Token, DateTime ExpiresAtUtc, MemberResponse Member);
 
-public record ReturnLoanRequest([Range(1, int.MaxValue)] int LoanId);
 
 /// <summary>Book list filters and sorting. Every filter is optional; all run inside the SQL query.</summary>
 public record BookQuery(
