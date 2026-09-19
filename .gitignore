@@ -484,3 +484,6 @@ $RECYCLE.BIN/
 ## Local config / secrets (never commit)
 appsettings.*.local.json
 *.pfx
+
+## NLog output
+logs/

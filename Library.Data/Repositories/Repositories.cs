@@ -1,6 +1,7 @@
 using Library.Core.Entities;
 using Library.Core.Exceptions;
 using Library.Core.Interfaces;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library.Data.Repositories;
@@ -117,5 +118,16 @@ public class UnitOfWork(LibraryDbContext db) : IUnitOfWork
             throw new ConcurrencyConflictException(
                 "The resource was modified by another request. Reload it and try again.", ex);
         }
+        catch (DbUpdateException ex) when (IsUniqueViolation(ex))
+        {
+            // Two requests passed the same "does it exist?" check and both inserted (e.g. the same
+            // member borrowing the same book twice at once). The unique index let only one through.
+            throw new ConcurrencyConflictException(
+                "A conflicting record was created by another request. Reload and try again.", ex);
+        }
     }
+
+    // SQL Server: 2601 = duplicate key in a unique index, 2627 = unique constraint violation.
+    private static bool IsUniqueViolation(DbUpdateException ex) =>
+        ex.InnerException is SqlException { Number: 2601 or 2627 };
 }

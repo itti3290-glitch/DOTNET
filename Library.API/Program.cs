@@ -4,8 +4,13 @@ using Library.API.Security;
 using Library.Data;   // Only here, for DI registration.
 using Library.Service;
 using Microsoft.OpenApi;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// NLog replaces the default providers; application code keeps using the standard ILogger.
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
 
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
@@ -36,6 +41,10 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// Order matters: correlation id first (everything after it is tagged), then request logging,
+// then exception handling, so the logged status is the final one.
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())

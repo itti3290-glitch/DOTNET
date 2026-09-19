@@ -58,7 +58,7 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
             error = title,
             // Never leak internals for unexpected errors.
             message = status == StatusCodes.Status500InternalServerError ? "An unexpected error occurred." : ex.Message,
-            traceId = context.TraceIdentifier
+            correlationId = context.GetCorrelationId()
         };
         await context.Response.WriteAsync(JsonSerializer.Serialize(payload, JsonOptions), context.RequestAborted);
     }
