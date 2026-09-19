@@ -236,7 +236,7 @@ namespace Library.Data.Migrations
                             Id = 2,
                             Email = "dana@library.local",
                             FullName = "Dana Levi",
-                            PasswordHash = "!SEED-PLACEHOLDER!",
+                            PasswordHash = "v1.210000.gk+khtvbDLcxJWq9rolcZw==.bl/tr0AX88InBEEjMRfj4r13yydmhusBwAuS99t3+oU=",
                             Role = "Member"
                         });
                 });
