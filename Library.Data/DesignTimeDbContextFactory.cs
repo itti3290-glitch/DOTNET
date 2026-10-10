@@ -15,7 +15,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<LibraryDbC
         var connection = Environment.GetEnvironmentVariable("LIBRARY_CONNECTION")
             ?? "Host=localhost;Port=5432;Database=LibraryApiDb;Username=postgres;Password=postgres";
 
-        var options = new DbContextOptionsBuilder<LibraryDbContext>().UseNpgsql(connection).Options;
+        var options = new DbContextOptionsBuilder<LibraryDbContext>().UseNpgsql(PostgresConnectionString.Normalize(connection)).Options;
         return new LibraryDbContext(options);
     }
 }

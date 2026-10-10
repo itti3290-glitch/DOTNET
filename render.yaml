@@ -1,0 +1,44 @@
+# Render Blueprint: one Docker web service plus the managed PostgreSQL it talks to.
+# Create it from the Render dashboard with "New > Blueprint" pointed at this repository.
+services:
+  - type: web
+    name: library-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      # Render supplies this as a postgres:// URI; PostgresConnectionString.Normalize translates
+      # it into the keyword form Npgsql needs.
+      - key: ConnectionStrings__DefaultConnection
+        fromDatabase:
+          name: library-db
+          property: connectionString
+
+      # Generated once and then held by Render, so the signing key is never in the repository.
+      # Every existing token stops validating if this is rotated.
+      - key: Jwt__SecretKey
+        generateValue: true
+
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+
+      # The deployed API is a demo, so leave its Swagger UI reachable. Set this to false to
+      # close it.
+      - key: Swagger__Enabled
+        value: "true"
+
+      # Set in the dashboard to the origin the browser client is served from; left unsynced
+      # because it is not known until the client is deployed. Without it, browser calls from
+      # another origin are refused by CORS.
+      - key: Cors__AllowedOrigins__0
+        sync: false
+
+databases:
+  - name: library-db
+    plan: free
+    region: oregon
+    databaseName: library
+    user: library

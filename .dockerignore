@@ -1,0 +1,19 @@
+# Keeping build output out of the context makes the image smaller and stops a host-built
+# bin/ from shadowing what the container compiles.
+**/bin/
+**/obj/
+**/logs/
+
+.git/
+.gitignore
+.vs/
+.vscode/
+.idea/
+
+**/*.user
+**/appsettings.Development.json
+
+Dockerfile
+.dockerignore
+README.md
+docs/
