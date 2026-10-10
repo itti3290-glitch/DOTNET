@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -17,29 +18,29 @@ namespace Library.Data.Migrations
                 name: "Books",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    Author = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Isbn = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    TotalCopies = table.Column<int>(type: "int", nullable: false),
-                    AvailableCopies = table.Column<int>(type: "int", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Title = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                    Author = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Isbn = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    TotalCopies = table.Column<int>(type: "integer", nullable: false),
+                    AvailableCopies = table.Column<int>(type: "integer", nullable: false),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Books", x => x.Id);
-                    table.CheckConstraint("CK_Books_AvailableCopies_LteTotal", "[AvailableCopies] <= [TotalCopies]");
-                    table.CheckConstraint("CK_Books_AvailableCopies_NonNegative", "[AvailableCopies] >= 0");
+                    table.CheckConstraint("CK_Books_AvailableCopies_LteTotal", "\"AvailableCopies\" <= \"TotalCopies\"");
+                    table.CheckConstraint("CK_Books_AvailableCopies_NonNegative", "\"AvailableCopies\" >= 0");
                 });
 
             migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -50,12 +51,12 @@ namespace Library.Data.Migrations
                 name: "Members",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FullName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Role = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FullName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    PasswordHash = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Role = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -66,8 +67,8 @@ namespace Library.Data.Migrations
                 name: "BookCategory",
                 columns: table => new
                 {
-                    BooksId = table.Column<int>(type: "int", nullable: false),
-                    CategoriesId = table.Column<int>(type: "int", nullable: false)
+                    BooksId = table.Column<int>(type: "integer", nullable: false),
+                    CategoriesId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -90,12 +91,12 @@ namespace Library.Data.Migrations
                 name: "Loans",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    BookId = table.Column<int>(type: "int", nullable: false),
-                    MemberId = table.Column<int>(type: "int", nullable: false),
-                    LoanedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReturnedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    BookId = table.Column<int>(type: "integer", nullable: false),
+                    MemberId = table.Column<int>(type: "integer", nullable: false),
+                    LoanedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ReturnedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -139,8 +140,8 @@ namespace Library.Data.Migrations
                 columns: new[] { "Id", "Email", "FullName", "PasswordHash", "Role" },
                 values: new object[,]
                 {
-                    { 1, "admin@library.local", "Library Admin", "!SEED-PLACEHOLDER!", "Admin" },
-                    { 2, "dana@library.local", "Dana Levi", "!SEED-PLACEHOLDER!", "Member" }
+                    { 1, "admin@library.local", "Library Admin", "v1.210000.IRzm9BJmjQ3lBW+ICEoajQ==.a5+PbzmF1az6vrnPDwyIjjW93HlY+881dxC+xz7oQaQ=", "Admin" },
+                    { 2, "dana@library.local", "Dana Levi", "v1.210000.gk+khtvbDLcxJWq9rolcZw==.bl/tr0AX88InBEEjMRfj4r13yydmhusBwAuS99t3+oU=", "Member" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -170,7 +171,7 @@ namespace Library.Data.Migrations
                 table: "Loans",
                 columns: new[] { "BookId", "MemberId" },
                 unique: true,
-                filter: "[ReturnedAt] IS NULL");
+                filter: "\"ReturnedAt\" IS NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Members_Email",

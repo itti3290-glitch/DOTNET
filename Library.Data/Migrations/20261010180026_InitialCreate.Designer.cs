@@ -3,17 +3,17 @@ using System;
 using Library.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace Library.Data.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    [Migration("20260919195625_SeedDemoMemberPassword")]
-    partial class SeedDemoMemberPassword
+    [Migration("20261010180026_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,17 +21,17 @@ namespace Library.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.12")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("BookCategory", b =>
                 {
                     b.Property<int>("BooksId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("CategoriesId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("BooksId", "CategoriesId");
 
@@ -44,36 +44,36 @@ namespace Library.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Author")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("AvailableCopies")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Isbn")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<int>("TotalCopies")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasKey("Id");
 
@@ -82,9 +82,9 @@ namespace Library.Data.Migrations
 
                     b.ToTable("Books", t =>
                         {
-                            t.HasCheckConstraint("CK_Books_AvailableCopies_LteTotal", "[AvailableCopies] <= [TotalCopies]");
+                            t.HasCheckConstraint("CK_Books_AvailableCopies_LteTotal", "\"AvailableCopies\" <= \"TotalCopies\"");
 
-                            t.HasCheckConstraint("CK_Books_AvailableCopies_NonNegative", "[AvailableCopies] >= 0");
+                            t.HasCheckConstraint("CK_Books_AvailableCopies_NonNegative", "\"AvailableCopies\" >= 0");
                         });
 
                     b.HasData(
@@ -94,7 +94,6 @@ namespace Library.Data.Migrations
                             Author = "Robert C. Martin",
                             AvailableCopies = 3,
                             Isbn = "9780132350884",
-                            RowVersion = new byte[0],
                             Title = "Clean Code",
                             TotalCopies = 3
                         },
@@ -104,7 +103,6 @@ namespace Library.Data.Migrations
                             Author = "Andrew Hunt, David Thomas",
                             AvailableCopies = 2,
                             Isbn = "9780135957059",
-                            RowVersion = new byte[0],
                             Title = "The Pragmatic Programmer",
                             TotalCopies = 2
                         },
@@ -114,7 +112,6 @@ namespace Library.Data.Migrations
                             Author = "Frank Herbert",
                             AvailableCopies = 1,
                             Isbn = "9780441013593",
-                            RowVersion = new byte[0],
                             Title = "Dune",
                             TotalCopies = 1
                         });
@@ -124,14 +121,14 @@ namespace Library.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -162,21 +159,21 @@ namespace Library.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BookId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("LoanedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("MemberId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("ReturnedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -185,7 +182,7 @@ namespace Library.Data.Migrations
                     b.HasIndex("BookId", "MemberId")
                         .IsUnique()
                         .HasDatabaseName("UX_Loans_ActivePerBookMember")
-                        .HasFilter("[ReturnedAt] IS NULL");
+                        .HasFilter("\"ReturnedAt\" IS NULL");
 
                     b.ToTable("Loans");
                 });
@@ -194,29 +191,29 @@ namespace Library.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("character varying(20)");
 
                     b.HasKey("Id");
 

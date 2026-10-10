@@ -10,7 +10,7 @@ public static class DependencyInjection
     /// <summary>Registers the DbContext, repositories and unit of work. Called only from Program.cs.</summary>
     public static IServiceCollection AddDataLayer(this IServiceCollection services, string connectionString)
     {
-        services.AddDbContext<LibraryDbContext>(o => o.UseSqlServer(connectionString));
+        services.AddDbContext<LibraryDbContext>(o => o.UseNpgsql(connectionString));
         services.AddScoped<IBookRepository, BookRepository>();
         services.AddScoped<IMemberRepository, MemberRepository>();
         services.AddScoped<ILoanRepository, LoanRepository>();

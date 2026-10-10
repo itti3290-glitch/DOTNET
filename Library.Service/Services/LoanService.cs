@@ -27,7 +27,7 @@ public class LoanService(
 
     public async Task<LoanResponse> LoanBookAsync(CreateLoanRequest request, CancellationToken ct)
     {
-        // Tracked read: the Book's RowVersion is captured here and checked again at SaveChanges.
+        // Tracked read: the Book's xmin concurrency token is captured here and checked again at SaveChanges.
         var book = await books.GetForUpdateAsync(request.BookId, ct)
             ?? throw new NotFoundException(nameof(Book), request.BookId);
         if (await members.GetByIdAsync(request.MemberId, ct) is null)

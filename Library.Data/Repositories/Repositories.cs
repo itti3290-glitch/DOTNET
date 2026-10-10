@@ -3,8 +3,8 @@ using Library.Core.Enums;
 using Library.Core.Entities;
 using Library.Core.Exceptions;
 using Library.Core.Interfaces;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Library.Data.Repositories;
 
@@ -155,7 +155,7 @@ public class UnitOfWork(LibraryDbContext db) : IUnitOfWork
         }
     }
 
-    // SQL Server: 2601 = duplicate key in a unique index, 2627 = unique constraint violation.
+    // PostgreSQL SQLSTATE 23505 = unique_violation (unique index or constraint).
     private static bool IsUniqueViolation(DbUpdateException ex) =>
-        ex.InnerException is SqlException { Number: 2601 or 2627 };
+        ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation };
 }

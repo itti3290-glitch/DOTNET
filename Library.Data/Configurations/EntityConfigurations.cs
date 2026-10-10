@@ -15,14 +15,17 @@ public class BookConfiguration : IEntityTypeConfiguration<Book>
         b.Property(x => x.Isbn).IsRequired().HasMaxLength(20);
         b.HasIndex(x => x.Isbn).IsUnique();
 
-        // Optimistic concurrency: SQL Server rowversion, checked on every UPDATE/DELETE.
-        b.Property(x => x.RowVersion).IsRowVersion();
+        // Optimistic concurrency, checked on every UPDATE/DELETE. xmin is the id of the
+        // transaction that last wrote the row; Postgres keeps it on every row already, so it is
+        // mapped as a shadow property rather than declared as a column - a migration must not
+        // try to create it, since "xmin" is a reserved system column name.
+        b.Property<uint>("xmin").HasColumnType("xid").IsRowVersion();
 
         // Invariants enforced by the database as a last line of defence.
         b.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_Books_AvailableCopies_NonNegative", "[AvailableCopies] >= 0");
-            t.HasCheckConstraint("CK_Books_AvailableCopies_LteTotal", "[AvailableCopies] <= [TotalCopies]");
+            t.HasCheckConstraint("CK_Books_AvailableCopies_NonNegative", "\"AvailableCopies\" >= 0");
+            t.HasCheckConstraint("CK_Books_AvailableCopies_LteTotal", "\"AvailableCopies\" <= \"TotalCopies\"");
         });
 
         // Many-to-many: Book <-> Category (EF creates the BookCategory join table).
@@ -83,7 +86,7 @@ public class LoanConfiguration : IEntityTypeConfiguration<Loan>
         // A member cannot hold two open loans of the same book.
         b.HasIndex(x => new { x.BookId, x.MemberId })
             .IsUnique()
-            .HasFilter("[ReturnedAt] IS NULL")
+            .HasFilter("\"ReturnedAt\" IS NULL")
             .HasDatabaseName("UX_Loans_ActivePerBookMember");
     }
 }

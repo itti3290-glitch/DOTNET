@@ -9,24 +9,43 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Library.Tests.Concurrency;
 
-/// <summary>Creates a throw-away LocalDB database with the real model (rowversion + CHECK constraints) and drops it afterwards.</summary>
+/// <summary>
+/// Creates a throw-away PostgreSQL database with the real model (xmin concurrency token + CHECK
+/// constraints) and drops it afterwards. These tests need a live server, so an unreachable one
+/// is recorded in <see cref="SkipReason"/> and the tests report as skipped rather than failing -
+/// or, worse, passing without having proved anything. Point LIBRARY_TEST_CONNECTION at a server
+/// to run them.
+/// </summary>
 public class ConcurrencyDbFixture : IAsyncLifetime
 {
     private static readonly string ConnectionString =
         Environment.GetEnvironmentVariable("LIBRARY_TEST_CONNECTION")
-        ?? $"Server=(localdb)\\MSSQLLocalDB;Database=LibraryTests_{Guid.NewGuid():N};Trusted_Connection=True;TrustServerCertificate=True";
+        ?? $"Host=localhost;Port=5432;Database=LibraryTests_{Guid.NewGuid():N};Username=postgres;Password=postgres";
+
+    /// <summary>Null when the database is usable; otherwise why these tests cannot run.</summary>
+    public string? SkipReason { get; private set; }
 
     public LibraryDbContext NewContext() =>
-        new(new DbContextOptionsBuilder<LibraryDbContext>().UseSqlServer(ConnectionString).Options);
+        new(new DbContextOptionsBuilder<LibraryDbContext>().UseNpgsql(ConnectionString).Options);
 
     public async Task InitializeAsync()
     {
-        await using var db = NewContext();
-        await db.Database.EnsureCreatedAsync(); // model incl. seed members 1 and 2
+        try
+        {
+            await using var db = NewContext();
+            await db.Database.EnsureCreatedAsync(); // model incl. seed members 1 and 2
+        }
+        catch (Exception ex)
+        {
+            SkipReason = $"No PostgreSQL server reachable for the concurrency tests. " +
+                         $"Set LIBRARY_TEST_CONNECTION to run them. ({ex.GetType().Name}: {ex.Message})";
+        }
     }
 
     public async Task DisposeAsync()
     {
+        if (SkipReason is not null) return;
+
         await using var db = NewContext();
         await db.Database.EnsureDeletedAsync();
     }
@@ -53,9 +72,11 @@ public class ConcurrencyDbFixture : IAsyncLifetime
 /// </summary>
 public class OptimisticConcurrencyTests(ConcurrencyDbFixture fixture) : IClassFixture<ConcurrencyDbFixture>
 {
-    [Fact]
+    [SkippableFact]
     public async Task TwoContextsChangingTheSameBook_FirstSaveWins_SecondThrowsDbUpdateConcurrencyException()
     {
+        Skip.If(fixture.SkipReason is not null, fixture.SkipReason);
+
         var bookId = await fixture.AddBookAsync(copies: 1);
         await using var first = fixture.NewContext();
         await using var second = fixture.NewContext();
@@ -78,9 +99,11 @@ public class OptimisticConcurrencyTests(ConcurrencyDbFixture fixture) : IClassFi
         Assert.Equal(0, stored.AvailableCopies); // decremented once, not twice
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task UnitOfWork_TranslatesTheEfExceptionIntoConcurrencyConflictException()
     {
+        Skip.If(fixture.SkipReason is not null, fixture.SkipReason);
+
         var bookId = await fixture.AddBookAsync(copies: 1);
         await using var first = fixture.NewContext();
         await using var second = fixture.NewContext();
@@ -97,9 +120,11 @@ public class OptimisticConcurrencyTests(ConcurrencyDbFixture fixture) : IClassFi
         Assert.IsType<DbUpdateConcurrencyException>(ex.InnerException);
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task TwoMembersRacingForTheLastCopy_ExactlyOneGetsIt()
     {
+        Skip.If(fixture.SkipReason is not null, fixture.SkipReason);
+
         var bookId = await fixture.AddBookAsync(copies: 1);
 
         // Two separate "requests": each has its own DbContext and its own service instances.
@@ -118,7 +143,7 @@ public class OptimisticConcurrencyTests(ConcurrencyDbFixture fixture) : IClassFi
 
         Assert.Equal(1, outcomes.Count(o => o.Ok));
         var loser = Assert.Single(outcomes, o => !o.Ok);
-        // Depending on timing the loser either hit the row-version check or saw zero copies left.
+        // Depending on timing the loser either hit the xmin concurrency check or saw zero copies left.
         Assert.True(loser.Error is ConcurrencyConflictException or NoCopiesAvailableException,
             $"Unexpected failure: {loser.Error}");
 
@@ -128,9 +153,11 @@ public class OptimisticConcurrencyTests(ConcurrencyDbFixture fixture) : IClassFi
         Assert.Equal(1, await check.Loans.CountAsync(l => l.BookId == bookId)); // never two loans for one copy
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task Database_RejectsNegativeStock_EvenWhenTheDomainMethodIsBypassed()
     {
+        Skip.If(fixture.SkipReason is not null, fixture.SkipReason);
+
         var bookId = await fixture.AddBookAsync(copies: 1);
         await using var db = fixture.NewContext();
         var book = await db.Books.SingleAsync(b => b.Id == bookId);

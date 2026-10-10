@@ -9,20 +9,18 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        // Books. Copy counts, RowVersion and categories are set by BookService, not mapped from requests.
+        // Books. Copy counts and categories are set by BookService, not mapped from requests.
         CreateMap<Book, BookResponse>()
             .ForCtorParam(nameof(BookResponse.Categories), o => o.MapFrom(b => b.Categories.Select(c => c.Name).OrderBy(n => n).ToList()));
         CreateMap<CreateBookRequest, Book>()
             .ForMember(b => b.Id, o => o.Ignore())
             .ForMember(b => b.AvailableCopies, o => o.Ignore())
-            .ForMember(b => b.RowVersion, o => o.Ignore())
             .ForMember(b => b.Loans, o => o.Ignore())
             .ForMember(b => b.Categories, o => o.Ignore());
         CreateMap<UpdateBookRequest, Book>()
             .ForMember(b => b.Id, o => o.Ignore())
             .ForMember(b => b.TotalCopies, o => o.Ignore())
             .ForMember(b => b.AvailableCopies, o => o.Ignore())
-            .ForMember(b => b.RowVersion, o => o.Ignore())
             .ForMember(b => b.Loans, o => o.Ignore())
             .ForMember(b => b.Categories, o => o.Ignore());
 
